@@ -50,7 +50,7 @@ export const sendBookingEmail = async (email, userName, eventName,eventDate,seat
         from: process.env.GMAIL_USER,
         to: email,
         subject: title,
-        text: `Hello ${userName},\n\nYour booking for "${eventName}" is confirmed.\n\nDate: ${eventDate}\nSeat: ${seatNumber}\n\nThank you for booking with us!`,
+        text: `Hello ${userName},\n\nYour booking for "${eventName}" is confirmed.\n\nDate: ${eventDate}\nSeat: ${seatNumber ? seatNumber : 0}\n\nThank you for booking with us!`,
         html: `
             <div style="font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;padding:20px;">
                 <div style="max-width:420px;margin:auto;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);">

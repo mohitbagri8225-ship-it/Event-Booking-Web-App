@@ -1,0 +1,15 @@
+import express from 'express';
+import {admin, verifyJwt} from "../middleware/auth.middleware.js";
+import { getAllEvents,getOneEvent,createEvent,updateEvent,deleteEvent } from '../controller/events.controller.js';
+
+const router = express.Router();
+
+router.get('/',verifyJwt,getAllEvents);
+router.get('/:id',verifyJwt,getOneEvent);
+router.post('/',verifyJwt,admin,createEvent);
+router.put('/:id',verifyJwt,admin,updateEvent);
+router.delete('/:id',verifyJwt,admin,deleteEvent);
+
+
+
+export default router;

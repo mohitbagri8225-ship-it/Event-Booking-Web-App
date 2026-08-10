@@ -12,7 +12,6 @@ const connectDB = async () => {
         dbName:DB_NAME
       }
     );
-
     console.log(`MongoDB connected: ${connectionInstance.connection.host}`);
 
   } catch (err) {

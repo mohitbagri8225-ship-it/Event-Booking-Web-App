@@ -12,6 +12,13 @@ const generateOTP = () => {
     return crypto.randomInt(100000, 1000000).toString();
 };
 
+//take user details 
+//if something is misssing thow error 
+//check if it already exist in db or not
+//if exists thow error 
+//create an entry and dont forgot to hash the password 
+//generate otp and send a email telling user to verify it 
+// return the user details 
 const registerUser = asyncHandler(async (req, res) => {
     const { username, email, password } = req.body;
 
@@ -59,7 +66,11 @@ const registerUser = asyncHandler(async (req, res) => {
 
     return res.status(201).json({
         success: true,
-        user: createdUser,
+        user: {
+            id: createdUser._id,
+            username: createdUser.username,
+            email: createdUser.email
+        },
         message: "User registered successfully. Please verify your email using the OTP sent."
     });
 });
@@ -83,6 +94,9 @@ const loginUser = asyncHandler(async (req, res) => {
         throw new apiError(401, "Invalid credentials");
     }
 
+    //if user is not verified then generate a otp
+    //remove old entries of otp for this account and send the new one to the user 
+    //throw an error telling user to verify the email first
     if(!user.isVerified && user.role === "user"){
         const otp = generateOTP();
         await Otp.deleteMany({ email: user.email, action: "account_verification" });

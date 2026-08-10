@@ -12,7 +12,7 @@ const OtpSchema = new mongoose.Schema(
         },
         action: {
             type: String,
-            enum: ["login", "account_verification"],
+            enum: ["login", "account_verification","booking_verification"],
             required: true
         },
         createdAt: {
