@@ -6,6 +6,8 @@ const asyncHandler = (fn) => async (req, res, next) => {
             success: false,
             message: "Internal Server Error"
         });
+        console.log(err);
+        
     }
 };
 

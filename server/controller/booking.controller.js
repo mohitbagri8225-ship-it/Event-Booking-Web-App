@@ -18,6 +18,8 @@ const generateOTP = () => {
 const sendBookingOtp = asyncHandler(async (req, res) => {
     const { eventId } = req.body;
     const userEmail = req.user.email;
+    console.log(userEmail);
+    
 
     if (!eventId) {
         throw new apiError(400, "eventId is required");
@@ -37,11 +39,11 @@ const sendBookingOtp = asyncHandler(async (req, res) => {
     await Otp.deleteMany({ email: userEmail, action: "booking_verification" });
     await Otp.create({ email: userEmail, otp, action: "booking_verification", expiresAt });
 
-    await sendEmail({
-        to: userEmail,
-        subject: "Your booking verification code",
-        body: `Your OTP is ${otp}. It is valid for ${OTP_EXPIRY_MINUTES} minutes.`
-    });
+    await sendEmail(
+        userEmail,
+        otp,
+        "Your booking verification code" 
+    );
 
     res.status(200).json({ success: true, message: "OTP sent to email" });
 });

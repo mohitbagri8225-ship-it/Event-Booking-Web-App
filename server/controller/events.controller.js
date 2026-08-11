@@ -51,6 +51,7 @@ const getOneEvent = asyncHandler(async (req, res) => {
 
 const createEvent = asyncHandler(async (req, res) => {
     const { title, description, date, location, category, ticketPrice, totalSeats, availableSeats, imageUrl } = req.body;
+    const userId = req.user._id;
 
     if (!title || !description || !date || !location || !category || !ticketPrice || !totalSeats || !availableSeats || !imageUrl) {
         throw new apiError(400, "All fields are required");
@@ -86,7 +87,8 @@ const createEvent = asyncHandler(async (req, res) => {
         ticketPrice,
         totalSeats,
         availableSeats,
-        imageUrl
+        imageUrl,
+        createdBy:userId
     });
 
     res.status(201).json({
@@ -97,7 +99,7 @@ const createEvent = asyncHandler(async (req, res) => {
 
 const updateEvent = asyncHandler(async (req, res) => {
     const { title, description, date, location, category, ticketPrice, totalSeats, availableSeats, imageUrl } = req.body;
-    const eventId = req.params;
+    const eventId = req.params.id;
 
     const event = await Event.findById(eventId);
 
@@ -105,7 +107,7 @@ const updateEvent = asyncHandler(async (req, res) => {
         throw new apiError(404, "Event not found");
     }
 
-    await Event.findByIdAndUpdate({
+    await Event.findByIdAndUpdate(eventId,{
         title, description, date, location, category, ticketPrice, totalSeats, availableSeats, imageUrl
     }, { new: true });
 
@@ -119,7 +121,7 @@ const updateEvent = asyncHandler(async (req, res) => {
         success: true,
         data: updatedEvent
     });
-})
+});
 
 const deleteEvent = asyncHandler(async (req, res) => {
     const eventId = req.params;

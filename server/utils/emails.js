@@ -12,10 +12,12 @@ const transporter = nodemailer.createTransport({
 });
 
 // Capitalize first letter of "type" for nicer display (e.g. "login" -> "Login")
-const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+// const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
 export const sendEmail = async (email, otp, type) => {
-    const title = `Your ${capitalize(type)} OTP Code`;
+    const title = `Your ${type} OTP Code`;
+    console.log(otp);
+    
 
     const mailOptions = {
         from: process.env.GMAIL_USER,
