@@ -4,12 +4,10 @@ import { getAllEvents,getOneEvent,createEvent,updateEvent,deleteEvent } from '..
 
 const router = express.Router();
 
-router.get('/',verifyJwt,getAllEvents);
-router.get('/:id',verifyJwt,getOneEvent);
-router.post('/create-event',verifyJwt,admin,createEvent);
-router.put('/:id',verifyJwt,admin,updateEvent);
-router.delete('/:id',verifyJwt,admin,deleteEvent);
-
-
+router.get('/', getAllEvents);
+router.get('/:id', getOneEvent);
+router.post('/create-event', verifyJwt, admin, createEvent);
+router.put('/:id', verifyJwt, admin, updateEvent);
+router.delete('/:id', verifyJwt, admin, deleteEvent);
 
 export default router;

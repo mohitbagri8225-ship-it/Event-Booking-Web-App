@@ -21,6 +21,8 @@ const generateOTP = () => {
 // return the user details 
 const registerUser = asyncHandler(async (req, res) => {
     const { username, email, password } = req.body;
+    console.log(req.body);
+    
 
     if (!username || !email || !password) {
         throw new apiError(400, "All fields are required");
@@ -92,7 +94,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, user.password);
 
-    if (!isMatch) {
+    if (!isMatch){
         throw new apiError(401, "Invalid credentials");
     }
 
@@ -107,8 +109,11 @@ const loginUser = asyncHandler(async (req, res) => {
             otp: otp,
             action: "account_verification"
         });
+        const data = await Otp.find({email:user.email,otp:otp});
+        console.log(data);
+        
         await sendEmail(user.email, otp, 'account_verification');
-        throw new apiError(401, "Please verify your email before logging in");
+        // throw new apiError(401, "Please verify your email before logging in");
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
@@ -147,6 +152,8 @@ const verifyOtp = asyncHandler(async (req, res) => {
     }
 
     const otpRecord = await Otp.findOne({ email, otp, action: "account_verification" });
+    console.log(otp,"hii");
+    
 
     if (!otpRecord) {
         throw new apiError(400, "Invalid or expired OTP");
@@ -163,9 +170,37 @@ const verifyOtp = asyncHandler(async (req, res) => {
 
     await Otp.deleteMany({ email, action: "account_verification" });
 
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+
+    return res
+        .status(200)
+        .cookie("token", token, {
+            httpOnly: true,
+            secure: true
+        })
+        .json({
+            success: true,
+            token,
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email,
+                isVerified: user.isVerified
+            },
+            message: "Email verified and logged in successfully"
+        });
+});
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user.id).select("-password");
+
+    if (!user) {
+        throw new apiError(404, "User not found");
+    }
+
     return res.status(200).json({
         success: true,
-        message: "Email verified successfully"
+        user,
     });
 });
 
@@ -173,5 +208,6 @@ export {
     registerUser,
     loginUser,
     logoutUser,
-    verifyOtp
+    verifyOtp,
+    getCurrentUser
 };

@@ -4,7 +4,7 @@ import { bookEvent, getMyBookings, confirmBooking, cancelBooking, sendBookingOtp
 
 const router = express.Router();
 
-router.post('/', verifyJwt, bookEvent);
+router.post('/book-event', verifyJwt, bookEvent);
 router.get('/my', verifyJwt, getMyBookings);
 router.put('/:id/confirm', verifyJwt, admin, confirmBooking);
 router.delete('/:id', verifyJwt, admin, cancelBooking);
