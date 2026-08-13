@@ -117,13 +117,16 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+    const cookieOptions = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        path: "/",
+    };
 
     return res
         .status(200)
-        .cookie("token", token, {
-            httpOnly: true,
-            secure: true
-        })
+        .cookie("token", token, cookieOptions)
         .json({
             success: true,
             token,
@@ -132,12 +135,16 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
+    const cookieOptions = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        path: "/",
+    };
+
    return res
     .status(200)
-    .clearCookie("token", {
-        httpOnly: true,
-        secure: false
-    })
+    .clearCookie("token", cookieOptions)
     .json({
         success: true,
         message: "User logged out successfully"

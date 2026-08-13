@@ -19,6 +19,7 @@ const normalizeEvent = (event) => ({
 function Home() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [query, setQuery] = useState("");
+  const [city, setCity] = useState("");
   const [favorites, setFavorites] = useState(new Set());
   const { isLoggedIn } = useAuth();
   const [events, setEvents] = useState(() => STATIC_EVENTS.map(normalizeEvent));
@@ -38,7 +39,10 @@ function Home() {
       query.trim() === "" ||
       item.title.toLowerCase().includes(query.toLowerCase()) ||
       item.venue.toLowerCase().includes(query.toLowerCase());
-    return matchesCategory && matchesQuery;
+    const matchesCity =
+      city.trim() === "" ||
+      item.location.toLowerCase().includes(city.toLowerCase());
+    return matchesCategory && matchesQuery && matchesCity;
   });
 
   useEffect(() => {
@@ -72,6 +76,8 @@ function Home() {
       <Hero
         query={query}
         setQuery={setQuery}
+        city={city}
+        setCity={setCity}
         favorites={favorites}
         onToggleFavorite={toggleFavorite}
         events={events}
@@ -96,6 +102,7 @@ function Home() {
         filtered={filtered}
         activeCategory={activeCategory}
         query={query}
+        city={city}
         favorites={favorites}
         onToggleFavorite={toggleFavorite}
       />

@@ -2,7 +2,7 @@ import React from "react";
 import { Zap, Search, MapPin, ArrowRight, ShieldCheck, Ticket } from "lucide-react";
 import TicketCard from "../Ticket/TicketCard.jsx";
 
-export default function Hero({ query, setQuery, favorites, onToggleFavorite, events = [] }) {
+export default function Hero({ query, setQuery, city, setCity, favorites, onToggleFavorite, events = [] }) {
   return (
     <header id="top" className="hero">
       <div>
@@ -37,7 +37,12 @@ export default function Hero({ query, setQuery, favorites, onToggleFavorite, eve
           <div className="search-divider" />
           <div className="search-field" style={{ flex: "0 0 130px" }}>
             <MapPin size={16} />
-            <input type="text" placeholder="City" />
+            <input
+              type="text"
+              placeholder="City"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+            />
           </div>
           <button type="submit" className="search-submit">
             Search <ArrowRight size={15} />

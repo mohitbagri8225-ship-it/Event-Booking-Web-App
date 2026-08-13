@@ -1,1 +1,48 @@
  @import "tailwindcss";
+
+:root {
+  --motion-duration: 0.7s;
+  --motion-ease: cubic-bezier(.25,.1,.25,1);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis:not(.lenis-stopped) {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* Navigation link animations */
+.nav-link {
+  transition: transform 0.18s var(--motion-ease), color 0.18s var(--motion-ease);
+}
+.nav-link:hover {
+  transform: translateY(-3px);
+}
+.nav-link.active {
+  font-weight: 600;
+  text-decoration: underline;
+}

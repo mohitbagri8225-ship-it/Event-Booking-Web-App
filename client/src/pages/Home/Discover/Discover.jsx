@@ -2,7 +2,7 @@ import React from "react";
 import { CATEGORIES } from "../data/constants.js"
 import TicketCard from "../Ticket/TicketCard.jsx"
 
-export default function Discover({ filtered, activeCategory, query, favorites, onToggleFavorite }) {
+export default function Discover({ filtered, activeCategory, query, city, favorites, onToggleFavorite }) {
   return (
     <section id="discover" className="section">
       <div className="section-head">
@@ -10,7 +10,8 @@ export default function Discover({ filtered, activeCategory, query, favorites, o
         <p className="section-note">
           {filtered.length} event{filtered.length !== 1 ? "s" : ""}
           {activeCategory !== "all" ? ` in ${CATEGORIES.find((c) => c.id === activeCategory)?.label}` : ""}
-          {query ? ` matching "${query}"` : ""}.
+          {query ? ` matching "${query}"` : ""}
+          {city ? ` in ${city}` : ""}.
         </p>
       </div>
 

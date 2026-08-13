@@ -73,10 +73,6 @@ const createEvent = asyncHandler(async (req, res) => {
         throw new apiError(400, "Seats cannot be negative");
     }
 
-    if (!imageUrl.match(/\.(jpeg|jpg|gif|png)$/)) {
-        throw new apiError(400, "Image URL must be a valid image format (jpeg, jpg, gif, png)");
-    }
-
 
     const event = await Event.create({
         title,
@@ -94,6 +90,18 @@ const createEvent = asyncHandler(async (req, res) => {
     res.status(201).json({
         success: true,
         data: event
+    });
+});
+
+const getMyEvents = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const events = await Event.find({ createdBy: userId });
+    // console.log(events);
+    
+
+    res.status(200).json({
+        success: true,
+        data: events,
     });
 });
 
@@ -144,6 +152,7 @@ export {
     getAllEvents,
     getOneEvent,
     createEvent,
+    getMyEvents,
     updateEvent,
     deleteEvent
 }

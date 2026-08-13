@@ -1,7 +1,11 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { X } from "lucide-react";
+import { useAuth } from "../../../context/auth.context.jsx";
 
 export default function MobileMenu({ menuOpen, setMenuOpen }) {
+  const { user, isLoggedIn } = useAuth();
+
   if (!menuOpen) return null;
 
   return (
@@ -16,8 +20,43 @@ export default function MobileMenu({ menuOpen, setMenuOpen }) {
       <a href="#categories" onClick={() => setMenuOpen(false)} className="mobile-link">Categories</a>
       <a href="#how" onClick={() => setMenuOpen(false)} className="mobile-link">How it works</a>
       <div style={{ marginTop: 30, display: "flex", flexDirection: "column", gap: 12 }}>
-        <button className="btn btn-ghost btn-block">Sign in</button>
-        <button className="btn btn-primary btn-block">Get the app</button>
+        {user?.role === "user" && (
+          <Link
+            to="/book-seat"
+            onClick={() => setMenuOpen(false)}
+            className="btn btn-ghost btn-block"
+          >
+            Grab a seat
+          </Link>
+        )}
+
+        {isLoggedIn ? (
+          <>
+            <Link
+              to={user?.role === "admin" ? "/my-events" : "/my-tickets"}
+              onClick={() => setMenuOpen(false)}
+              className="btn btn-ghost btn-block"
+            >
+              {user?.role === "admin" ? "My Events" : "My Tickets"}
+            </Link>
+            <Link
+              to="/profile"
+              onClick={() => setMenuOpen(false)}
+              className="btn btn-primary btn-block"
+            >
+              Profile
+            </Link>
+          </>
+        ) : (
+          <>
+            <Link to="/login" onClick={() => setMenuOpen(false)} className="btn btn-ghost btn-block">
+              Sign in
+            </Link>
+            <Link to="/register" onClick={() => setMenuOpen(false)} className="btn btn-primary btn-block">
+              Get started
+            </Link>
+          </>
+        )}
       </div>
     </div>
   );

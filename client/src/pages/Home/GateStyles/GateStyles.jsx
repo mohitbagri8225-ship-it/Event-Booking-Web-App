@@ -52,6 +52,15 @@ export default function GateStyles() {
           transition: background 0.25s ease, border-color 0.25s ease, padding 0.25s ease;
           border-bottom: 1px solid transparent;
         }
+        .desktop-only { display:flex; align-items:center; }
+        @media (max-width: 840px) {
+          .nav-links { display:none !important; }
+          .desktop-only { display:none; }
+        }
+        @media (max-width: 640px) {
+          .gate-nav { padding: 12px 4vw; }
+          .logo span { font-size: 18px; }
+        }
         .gate-nav.scrolled {
           background: rgba(19,16,34,0.88);
           backdrop-filter: blur(10px);
@@ -68,9 +77,9 @@ export default function GateStyles() {
         .nav-links { display: flex; gap: 32px; align-items:center; }
         .nav-link {
           font-size: 14px; color: var(--muted); text-decoration:none;
-          transition: color 0.2s ease;
+          transition: color 0.2s ease, transform 0.2s ease;
         }
-        .nav-link:hover { color: var(--paper); }
+        .nav-link:hover { color: var(--paper); transform: translateY(-1px); }
         .btn {
           font-family: 'Space Grotesk', sans-serif;
           font-weight: 600;
@@ -80,13 +89,15 @@ export default function GateStyles() {
           border: none;
           cursor: pointer;
           display: inline-flex; align-items: center; gap: 8px;
-          transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+          transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, opacity 0.18s ease;
         }
         .btn:focus-visible { outline: 2px solid var(--marigold); outline-offset: 3px; }
         .btn-primary { background: var(--marigold); color: var(--ink); }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(243,169,59,0.28); }
         .btn-ghost { background: transparent; color: var(--paper); border: 1px solid rgba(246,241,228,0.28); }
         .btn-ghost:hover { border-color: var(--paper); transform: translateY(-2px); }
+        .btn-danger { background: transparent; color: var(--coral); border: 1px solid rgba(239,93,93,0.12); }
+        .btn-danger:hover { background: rgba(239,93,93,0.06); transform: translateY(-2px); }
         .btn-block { width: 100%; justify-content: center; }
 
         .icon-btn {
@@ -103,9 +114,9 @@ export default function GateStyles() {
           background: var(--ink);
           display: flex; flex-direction: column;
           padding: 22px 6vw;
-          animation: fadeIn 0.2s ease;
+          animation: fadeInSlide 0.24s ease forwards;
         }
-        @keyframes fadeIn { from {opacity:0} to {opacity:1} }
+        @keyframes fadeInSlide { from { opacity:0; transform: translateY(-12px); } to { opacity:1; transform: translateY(0); } }
         .mobile-link {
           font-family:'Anton', sans-serif;
           text-transform: uppercase;
@@ -164,6 +175,7 @@ export default function GateStyles() {
           padding: 6px; margin-bottom: 30px;
           max-width: 560px;
           box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+          transition: box-shadow 0.2s ease, transform 0.2s ease;
         }
         .search-field {
           display:flex; align-items:center; gap:8px;
@@ -178,22 +190,32 @@ export default function GateStyles() {
         }
         .search-field input::placeholder { color: #8a8474; }
         .search-divider { width:1px; background: rgba(19,16,34,0.12); margin: 6px 0; }
+        @media (max-width: 680px) {
+          .search-bar { flex-wrap: wrap; }
+          .search-field { min-width: 0; }
+          .search-field:nth-child(1), .search-field:nth-child(3) { flex: 1 1 100%; }
+          .search-field:nth-child(2) { flex: 1 1 180px; }
+          .search-divider { display: none; }
+          .search-submit { width: 100%; border-radius: 14px; }
+        }
         .search-submit {
           background: var(--ink); color: var(--paper);
           border-radius: 12px; border:none; padding: 0 20px;
           display:flex; align-items:center; gap:8px; cursor:pointer;
           font-weight:600; font-size:14px;
+          transition: background 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
         }
-        .search-submit:hover { background: #221d3b; }
+        .search-submit:hover { background: #221d3b; transform: translateY(-1px); }
 
         /* fanned hero tickets */
-        .hero-stage { position: relative; height: 420px; }
+        .hero-stage { position: relative; height: 420px; overflow: hidden; }
         @media (max-width: 920px) { .hero-stage { height: 340px; margin-top: 10px; } }
         .hero-stage .ticket-card {
           position: absolute; width: min(300px, 78vw);
           top: 10px; left: 50%;
-          transition: transform 0.35s ease, box-shadow 0.35s ease;
+          transition: transform 0.35s ease, box-shadow 0.35s ease, opacity 0.35s ease;
         }
+        .hero-stage .ticket-card:hover { box-shadow: 0 36px 70px rgba(0,0,0,0.4); }
         .hero-stage .ticket-card:hover { z-index: 5 !important; box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
         .hero-stage .ticket-card:nth-child(1) { transform: translateX(-72%) rotate(-9deg); z-index: 1; }
         .hero-stage .ticket-card:nth-child(2) { transform: translateX(-50%) rotate(2deg) translateY(-14px); z-index: 3; }
@@ -205,8 +227,11 @@ export default function GateStyles() {
         /* categories */
         .cat-row {
           display:flex; gap: 10px; overflow-x:auto;
-          padding: 0 6vw 40px;
+          padding: 0 6vw 36px;
           scrollbar-width: none;
+        }
+        @media (max-width: 740px) {
+          .cat-row { gap: 8px; padding: 0 4vw 32px; }
         }
         .cat-row::-webkit-scrollbar { display:none; }
         .cat-pill {
@@ -244,6 +269,8 @@ export default function GateStyles() {
           box-shadow: 0 16px 34px rgba(0,0,0,0.28);
           position: relative;
         }
+        .booking-card { padding: 18px; border-radius: 16px; display: grid; grid-template-columns: 1fr 200px; align-items: center; gap: 18px; }
+        @media (max-width: 760px) { .booking-card { grid-template-columns: 1fr; } }
         .ticket-stub { flex: 1; display:flex; flex-direction:column; min-width:0; }
         .ticket-image-wrap { position: relative; height: 150px; }
         .ticket-image { width:100%; height:100%; object-fit:cover; display:block; }
@@ -314,9 +341,10 @@ export default function GateStyles() {
 
         .events-grid {
           display:grid; grid-template-columns: repeat(3, 1fr); gap: 22px;
+          transition: all 0.2s ease;
         }
         @media (max-width: 980px) { .events-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 640px) { .events-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 760px) { .events-grid { grid-template-columns: 1fr; } }
         .events-grid .ticket-card { animation: rise 0.4s ease both; }
         @keyframes rise { from { opacity:0; transform: translateY(14px);} to {opacity:1; transform:translateY(0);} }
 

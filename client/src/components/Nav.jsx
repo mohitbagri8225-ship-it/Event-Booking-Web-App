@@ -1,78 +1,232 @@
-import React, { useEffect,useState } from "react";
-import { Ticket, Menu, ArrowUpRight, User as UserIcon } from "lucide-react";
+import React from "react";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+
+import {
+  Ticket,
+  Menu,
+  ArrowUpRight,
+  User as UserIcon,
+} from "lucide-react";
+
 import { useAuth } from "../context/auth.context";
+import { motion } from "framer-motion";
 
 export default function Nav({ scrolled, menuOpen, setMenuOpen }) {
   const { user, logout, isLoggedIn } = useAuth();
 
-  console.log("isLoggedIn:", isLoggedIn);
-  // console.log("user:", user); 
-  
-  
-  const [role, setRole] = useState("");
-  
-  useEffect(() => {
-    if (user) {
-      setRole(user.role);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Handle navigation to sections on the home page
+  const goToSection = (id, e) => {
+    if (e && e.preventDefault) {
+      e.preventDefault();
     }
-  }, [user]);
-  console.log(role);
+
+    // If we are not on the home page,
+    // first navigate to home and tell it which section to scroll to
+    if (location.pathname !== "/") {
+      navigate("/", {
+        state: {
+          scrollTo: id,
+        },
+      });
+
+      return;
+    }
+
+    // Find the section
+    const el = document.getElementById(id);
+
+    // Scroll to section
+    if (el) {
+      el.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+
+      // Update URL hash
+      window.history.replaceState(
+        null,
+        "",
+        `#${id}`
+      );
+    }
+  };
 
   return (
-    <nav className={`gate-nav ${scrolled ? "scrolled" : ""}`}>
+    <motion.nav
+      className={`gate-nav ${scrolled ? "scrolled" : ""}`}
+      initial={{
+        opacity: 0,
+        y: -8,
+      }}
+      animate={{
+        opacity: 1,
+        y: 0,
+      }}
+      transition={{
+        duration: 0.45,
+      }}
+    >
+      {/* ================= LOGO ================= */}
 
-      {/* Logo */}
       <a href="#top" className="logo">
         <span className="logo-mark">
-          <Ticket size={16} color="#131022" strokeWidth={2.6} />
+          <Ticket
+            size={16}
+            color="#131022"
+            strokeWidth={2.6}
+          />
         </span>
 
         <span
           className="font-display"
-          style={{ fontSize: 20 }}
+          style={{
+            fontSize: 20,
+          }}
         >
           Gate.
         </span>
       </a>
 
-      {/* Main Navigation */}
+      {/* ================= MAIN NAVIGATION ================= */}
+
       <div
         className="nav-links"
-        style={{ display: menuOpen ? "none" : undefined }}
+        style={{
+          display: menuOpen ? "none" : undefined,
+        }}
       >
-        <a href="#discover" className="nav-link">
+        {/* HOME */}
+
+        <Link
+          to="/"
+          className={`nav-link ${
+            location.pathname === "/" &&
+            !location.hash
+              ? "active"
+              : ""
+          }`}
+        >
+          Home
+        </Link>
+
+        {/* DISCOVER */}
+
+        <a
+          href="#discover"
+          onClick={(e) =>
+            goToSection("discover", e)
+          }
+          className={`nav-link ${
+            location.hash === "#discover"
+              ? "active"
+              : ""
+          }`}
+        >
           Discover
         </a>
 
-        <a href="#categories" className="nav-link">
+        {/* CATEGORIES */}
+
+        <a
+          href="#categories"
+          onClick={(e) =>
+            goToSection("categories", e)
+          }
+          className={`nav-link ${
+            location.hash === "#categories"
+              ? "active"
+              : ""
+          }`}
+        >
           Categories
         </a>
 
-        <a href="#how" className="nav-link">
+        {/* HOW IT WORKS */}
+
+        <a
+          href="#how"
+          onClick={(e) =>
+            goToSection("how", e)
+          }
+          className={`nav-link ${
+            location.hash === "#how"
+              ? "active"
+              : ""
+          }`}
+        >
           How it works
         </a>
 
-         {
-          user?.role === "user" ? <a href="/book-seat" className="nav-link">
-          grab a seat
-        </a> :null
-         }
+        {/* ================= USER LINKS ================= */}
 
-        {/* Only show these when logged in */}
+        {user?.role === "user" && (
+          <Link
+            to="/book-seat"
+            className={`nav-link ${
+              location.pathname === "/book-seat"
+                ? "active"
+                : ""
+            }`}
+          >
+            Grab a seat
+          </Link>
+        )}
+
+        {/* ================= ADMIN LINKS ================= */}
+
+        {user?.role === "admin" && (
+          <Link
+            to="/post-events"
+            className={`nav-link ${
+              location.pathname === "/post-events"
+                ? "active"
+                : ""
+            }`}
+          >
+            Post Events
+          </Link>
+        )}
+
+        {/* ================= MY EVENTS / MY TICKETS ================= */}
+
         {isLoggedIn && (
           <>
-            {
-            user?.role === "admin" ? <a href="/my-events" className="nav-link">
-             My Events
-          </a> :<a href="/my-tickets" className="nav-link">
-             My Tickets
-          </a>
-          }
+            {user?.role === "admin" ? (
+              <Link
+                to="/my-events"
+                className={`nav-link ${
+                  location.pathname === "/my-events"
+                    ? "active"
+                    : ""
+                }`}
+              >
+                My Events
+              </Link>
+            ) : (
+              <Link
+                to="/my-tickets"
+                className={`nav-link ${
+                  location.pathname === "/my-tickets"
+                    ? "active"
+                    : ""
+                }`}
+              >
+                My Tickets
+              </Link>
+            )}
           </>
         )}
       </div>
 
-      {/* Right side */}
+      {/* ================= RIGHT SIDE ================= */}
+
       <div
         style={{
           display: "flex",
@@ -80,8 +234,8 @@ export default function Nav({ scrolled, menuOpen, setMenuOpen }) {
           alignItems: "center",
         }}
       >
+        {/* ================= DESKTOP BUTTONS ================= */}
 
-        {/* DESKTOP BUTTONS */}
         <div
           style={{
             display: "flex",
@@ -90,29 +244,32 @@ export default function Nav({ scrolled, menuOpen, setMenuOpen }) {
           }}
           className="desktop-only"
         >
-
           {!isLoggedIn ? (
             <>
-              {/* NOT LOGGED IN */}
-              <a href="/login">
+              {/* SIGN IN */}
+
+              <Link to="/login">
                 <button className="btn btn-ghost">
                   Sign in
                 </button>
-              </a>
+              </Link>
 
-              <a href="/register">
+              {/* GET STARTED */}
+
+              <Link to="/register">
                 <button className="btn btn-primary">
                   Get started
+
                   <ArrowUpRight size={15} />
                 </button>
-              </a>
+              </Link>
             </>
           ) : (
             <>
-              {/* LOGGED IN */}
+              {/* PROFILE */}
 
-              <a
-                href="/profile"
+              <Link
+                to="/profile"
                 className="btn btn-ghost"
                 style={{
                   display: "flex",
@@ -123,7 +280,9 @@ export default function Nav({ scrolled, menuOpen, setMenuOpen }) {
                 <UserIcon size={16} />
 
                 {user?.username || "Profile"}
-              </a>
+              </Link>
+
+              {/* LOGOUT */}
 
               <button
                 className="btn btn-primary"
@@ -133,19 +292,19 @@ export default function Nav({ scrolled, menuOpen, setMenuOpen }) {
               </button>
             </>
           )}
-
         </div>
 
-        {/* MOBILE MENU BUTTON */}
+        {/* ================= MOBILE MENU BUTTON ================= */}
+
         <button
           className="icon-btn"
           onClick={() => setMenuOpen(true)}
           aria-label="Open menu"
+          title="Open menu"
         >
           <Menu size={18} />
         </button>
-
       </div>
-    </nav>
+    </motion.nav>
   );
 }
