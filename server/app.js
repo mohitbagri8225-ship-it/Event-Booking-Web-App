@@ -17,9 +17,9 @@ app.use(express.urlencoded({ extended: true }));//parse incoming URL-encoded req
 //Routes
 import authRoutes from './routes/auth.routes.js';
 import eventRoutes from './routes/events.routes.js';
-import bookingRoutes from './routes/booking.routes.js';
+import bookingRoutes from './routes/booking.routes.js'; 
 app.use('/api/auth', authRoutes);
 app.use('/api/bookings', bookingRoutes);
-app.use('/api/events', eventRoutes);
+app.use('/api/events', eventRoutes); 
 
 export default app;

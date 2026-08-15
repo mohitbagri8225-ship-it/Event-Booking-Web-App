@@ -7,11 +7,30 @@ import { Otp } from "../models/otp.model.js";
 import { Event } from "../models/event.model.js";
 import { Booking } from "../models/booking.model.js";
 import { sendEmail, sendBookingEmail } from "../utils/emails.js";
+import { razorPayInstance } from "../index.js";
 
 const OTP_EXPIRY_MINUTES = 10;
 
 const generateOTP = () => {
     return crypto.randomInt(100000, 1000000).toString();
+};
+
+const verifyRazorpaySignature = (
+    razorpayOrderId,
+    razorpayPaymentId,
+    razorpaySignature
+) => {
+    const body = razorpayOrderId + "|" + razorpayPaymentId;
+
+    const expectedSignature = crypto
+        .createHmac(
+            "sha256",
+            process.env.RAZOR_API_SECRET_KEY
+        )
+        .update(body)
+        .digest("hex");
+
+    return expectedSignature === razorpaySignature;
 };
 
 
@@ -50,6 +69,8 @@ const sendBookingOtp = asyncHandler(async (req, res) => {
 
 const bookEvent = asyncHandler(async (req, res) => {
     const { eventId, otp, quantity } = req.body;
+    console.log(otp);
+    
 
     if (!eventId || !otp || !quantity) {
         throw new apiError(400, "eventId, otp and quantity are required");
@@ -81,12 +102,21 @@ const bookEvent = asyncHandler(async (req, res) => {
         throw new apiError(400, "Invalid OTP");
     }
 
-    const booking = await Booking.create({
-        userId: req.user._id,
-        eventId,
-        quantity,
-        amount: event.ticketPrice * quantity
-    });
+    const options = {
+        amount:event.ticketPrice*quantity*100,
+        currency:"INR",
+    };
+
+    const order = await razorPayInstance.orders.create(options);
+    console.log(order);
+
+   const booking = await Booking.create({
+    userId: req.user._id,
+    eventId,
+    quantity,
+    amount: event.ticketPrice * quantity,
+    razorpayOrderId: order.id
+});
 
     event.availableSeats -= quantity;
     await event.save();
@@ -96,41 +126,99 @@ const bookEvent = asyncHandler(async (req, res) => {
     res.status(201).json({
         success: true,
         message: "Booking created. Please check your email for confirmation.",
-        data: booking
+        data: booking,
+        order:order
     });
 });
 
 const confirmBooking = asyncHandler(async (req, res) => {
-    const { paymentStatus } = req.body;
-
-    if (!["paid", "non-paid"].includes(paymentStatus)) {
-        throw new apiError(400, "Invalid payment status");
+    console.log("BODY:", req.body);
+    const {bookingId,razorpay_payment_id,razorpay_order_id, razorpay_signature} = req.body;
+ 
+    if (!bookingId || !razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+        throw new apiError(400,"Missing payment verification details");
     }
+ 
+    // 2. Find booking
+    const booking = await Booking.findById(bookingId).populate("eventId").populate("userId");
 
-    const booking = await Booking.findById(req.params.id).populate('eventId').populate('userId');
     if (!booking) {
         throw new apiError(404, "Booking not found");
     }
-    if (booking.status === 'confirmed') {
-        throw new apiError(400, "Booking already confirmed");
+
+    // 3. Prevent duplicate confirmation
+    if (booking.status === "confirmed") {
+        throw new apiError(400,"Booking already confirmed"
+        );
     }
 
-    const event = await Event.findById(booking.eventId._id);
+    // 4. Get Razorpay order ID from YOUR database
+    const razorpayOrderIdFromDB = booking.razorpayOrderId;
+
+    if (!razorpayOrderIdFromDB) {
+        throw new apiError(
+            400,
+            "Razorpay order ID not found"
+        );
+    }
+
+    // 5. Verify that returned order belongs to our booking
+    if (razorpay_order_id !== razorpayOrderIdFromDB) {
+        throw new apiError(
+            400,
+            "Invalid Razorpay order"
+        );
+    }
+
+    // 6. VERIFY RAZORPAY SIGNATURE 
+    const isValid = verifyRazorpaySignature(razorpayOrderIdFromDB,razorpay_payment_id,razorpay_signature);
+
+    if (!isValid) {
+        throw new apiError(
+            400,
+            "Payment verification failed"
+        );
+    }
+
+    // 7. Payment is genuine
+    const paymentStatus = "paid";
+
+    // 8. Get event
+    const event = await Event.findById(
+        booking.eventId._id
+    );
+
+
     if (!event) {
-        throw new apiError(404, "Event not found");
+        throw new apiError(
+            404,
+            "Event not found"
+        );
     }
+    
+    // 9. Check seats
     if (event.availableSeats <= 0) {
-        throw new apiError(400, "Seats are not available");
+        throw new apiError(
+            400,
+            "Seats are not available"
+        );
     }
 
+    // 10. Update booking
     booking.status = "confirmed";
     booking.paymentStatus = paymentStatus;
+    booking.razorpayPaymentId =razorpay_payment_id;
+    booking.razorpaySignature =razorpay_signature;
     await booking.save();
 
+
+    // 11. Reduce seats
     event.availableSeats -= 1;
     await event.save();
 
+    // 12. Send confirmation email
     const bookingUser = booking.userId;
+
     await sendBookingEmail(
         bookingUser.email,
         bookingUser.username,
@@ -139,6 +227,7 @@ const confirmBooking = asyncHandler(async (req, res) => {
         event.availableSeats
     );
 
+    // 13. Response
     res.status(200).json({
         success: true,
         message: "Booking confirmed",

@@ -125,24 +125,112 @@ const BookEvent = () => {
     setMessage("");
 
     try {
-      const res = await fetch("http://localhost:5000/api/bookings/book-event", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ eventId, otp, quantity }),
-      });
+      const res = await fetch(
+        "http://localhost:5000/api/bookings/book-event",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            eventId,
+            otp,
+            quantity,
+          }),
+        }
+      );
 
       const data = await res.json();
+
+      console.log("Backend response:", data);
+      console.log(data);
+
 
       if (!res.ok) {
         setMessage(data?.message || "Booking failed");
         return;
       }
 
-      setSuccess(true);
-      setMessage(data.message || "Booking confirmed!");
+      const order = data.order;
+
+
+      if (!order) {
+        setMessage("Razorpay order was not created.");
+        return;
+      }
+
+      if (!window.Razorpay) {
+        setMessage("Razorpay checkout is not loaded.");
+        return;
+      }
+      const bookingId = data.data._id; 
+
+      const options = {
+        key: import.meta.env.VITE_RAZOR_API_KEY,
+        amount: order.amount,
+        currency: order.currency,
+        name: "Eventora",
+        description: event.title,
+        order_id: order.id,
+         
+
+        handler: async function (response) { 
+          
+          const res = await fetch(
+            `http://localhost:5000/api/bookings/confirm`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              credentials: "include",
+              body: JSON.stringify({
+                bookingId,
+                eventId,
+                quantity,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            }
+          );
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            setMessage(data.message || "Payment verification failed");
+            return;
+          }
+
+          setSuccess(true);
+        },
+
+        prefill: {
+          name: user?.username || "",
+          email: user?.email || "",
+        },
+
+        theme: {
+          color: "#3399cc",
+        },
+      };
+
+      const razorpay = new window.Razorpay(options);
+
+      razorpay.on("payment.failed", function (response) {
+        console.log("Payment failed:", response);
+
+        setMessage(
+          response.error?.description ||
+          "Payment failed. Please try again."
+        );
+      });
+
+      razorpay.open();
     } catch (err) {
-      setMessage("Unable to connect to the server right now.");
+      console.error("BOOKING ERROR:", err);
+      setMessage("Something went wrong. Check the browser console.");
     } finally {
       setLoading(false);
     }

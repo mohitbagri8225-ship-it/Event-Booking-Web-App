@@ -75,7 +75,7 @@ export default function Nav({ scrolled, menuOpen, setMenuOpen }) {
     >
       {/* ================= LOGO ================= */}
 
-      <a href="#top" className="logo">
+      <a href="/" className="logo">
         <span className="logo-mark">
           <Ticket
             size={16}
@@ -166,18 +166,7 @@ export default function Nav({ scrolled, menuOpen, setMenuOpen }) {
 
         {/* ================= USER LINKS ================= */}
 
-        {user?.role === "user" && (
-          <Link
-            to="/book-seat"
-            className={`nav-link ${
-              location.pathname === "/book-seat"
-                ? "active"
-                : ""
-            }`}
-          >
-            Grab a seat
-          </Link>
-        )}
+         
 
         {/* ================= ADMIN LINKS ================= */}
 

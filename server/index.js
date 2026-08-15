@@ -2,12 +2,20 @@
 import app from "./app.js";
 import dotenv from "dotenv"; 
 import connectDB from "./db/db.config.js";
+import Razorpay from "razorpay"
 
 
 
 dotenv.config({
     path:'./.env'
 });
+
+export const razorPayInstance = new Razorpay(
+    {
+        key_id:process.env.RAZOR_API_KEY,
+        key_secret:process.env.RAZOR_API_SECRET_KEY
+    }
+);
 
 connectDB()
 .then(() => {

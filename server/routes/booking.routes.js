@@ -5,8 +5,8 @@ import { bookEvent, getMyBookings, confirmBooking, cancelBooking, sendBookingOtp
 const router = express.Router();
 
 router.post('/book-event', verifyJwt, bookEvent);
-router.get('/my', verifyJwt, getMyBookings);
-router.put('/:id/confirm', verifyJwt, admin, confirmBooking);
+router.get('/my',verifyJwt, getMyBookings);
+router.post('/confirm', verifyJwt, confirmBooking);
 // Allow users to cancel their own bookings; controller enforces ownership
 router.delete('/:id', verifyJwt, cancelBooking);
 router.post('/send-otp', verifyJwt, sendBookingOtp);

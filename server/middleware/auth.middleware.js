@@ -9,7 +9,7 @@ import ApiError from "../utils/apiError.js"
 const verifyJwt = asyncHandler(async (req, res, next) => {
     const authHeader = req.headers.authorization || req.cookies.token;
 
-    if (!authHeader) {
+    if (!authHeader && !req.cookies) {
         throw new ApiError(401, "Unauthorized request");
     }
 
